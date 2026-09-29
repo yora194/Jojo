@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>قد إيه تعرف يورا؟ ❤️</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #111, #3a0b20);
+      color: white;
+      padding: 20px;
+    }
+
+    .game {
+      width: 100%;
+      max-width: 550px;
+      background: rgba(255,255,255,0.08);
+      padding: 30px;
+      border-radius: 25px;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 30px;
+    }
+
+    #progress {
+      opacity: 0.7;
+      margin-bottom: 20px;
+    }
+
+    #question {
+      font-size: 24px;
+      margin: 25px 0;
+      line-height: 1.5;
+    }
+
+    .answers {
+      display: grid;
+      gap: 12px;
+    }
+
+    button {
+      border: none;
+      padding: 15px;
+      border-radius: 14px;
+      font-size: 17px;
+      cursor: pointer;
+      background: white;
+      color: #222;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+    }
+
+    button.correct {
+      background: #39c96b;
+      color: white;
+    }
+
+    button.wrong {
+      background: #e74c3c;
+      color: white;
+    }
+
+    #next {
+      margin-top: 20px;
+      background: #ff4f91;
+      color: white;
+      display: none;
+    }
+
+    #result {
+      display: none;
+    }
+
+    .score {
+      font-size: 55px;
+      font-weight: bold;
+      margin: 20px;
+    }
+
+    .restart {
+      background: #ff4f91;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="game">
+
+  <div id="quiz">
+
+    <h1>❤️ قد إيه تعرف يورا؟</h1>
+
+    <div id="progress"></div>
+
+    <div id="question"></div>
+
+    <div class="answers" id="answers"></div>
+
+    <button id="next" onclick="nextQuestion()">السؤال اللي بعده ➜</button>
+
+  </div>
+
+  <div id="result">
+
+    <h1>خلصت الاختبار 😂❤️</h1>
+
+    <div class="score">
+      <span id="score">0</span>/10
+    </div>
+
+    <p id="message"></p>
+
+    <button class="restart" onclick="location.reload()">
+      جرب تاني 😈
+    </button>
+
+  </div>
+
+</div>
+
+<script>
+
+const questions = [
+
+  {
+    question: "إيه لون يورا المفضل؟ 🖤",
+    answers: ["الأبيض", "الأسود", "الأزرق", "البنفسجي"],
+    correct: "الأسود"
+  },
+
+  {
+    question: "إيه أكتر أكلة يورا بتحبها؟ 🍝",
+    answers: ["البيتزا", "الكشري", "البشاميل", "البرجر"],
+    correct: "البشاميل"
+  },
+
+  {
+    question: "إيه مشروب يورا المفضل؟ 🥤",
+    answers: ["قهوة", "مكس شيكولاته", "عصير مانجا", "شاي"],
+    correct: "مكس شيكولاته"
+  },
+
+  {
+    question: "لو عندها وقت فاضي، يورا بتحب تعمل إيه؟ 🎬",
+    answers: ["تلعب ألعاب", "تقرأ كتاب", "تتفرج على فيلم", "تخرج تتمشى"],
+    correct: "تتفرج على فيلم"
+  },
+
+  {
+    question: "إيه أكتر حاجة يورا بتحبها من دول؟ 💻",
+    answers: ["الرسم", "البرمجة", "الطبخ", "التصوير"],
+    correct: "البرمجة"
+  },
+
+  {
+    question: "إيه نوع الأفلام اللي يورا بتحبه أكتر؟ 🍿",
+    answers: ["رومانسي", "كوميدي", "أكشن", "رعب"],
+    correct: "أكشن"
+  },
+
+  {
+    question: "إيه نوع الموسيقى اللي يورا بتحبه؟ 🎵",
+    answers: ["بوب", "راب", "روك", "كلاسيك"],
+    correct: "راب"
+  },
+
+  {
+    question: "إيه الحيوان المفضل عند يورا؟ 🐾",
+    answers: ["كلب", "أرنب", "قطة", "حصان"],
+    correct: "قطة"
+  },
+
+  {
+    question: "إيه أكتر حاجة بتضايق يورا؟ 😒",
+    answers: ["الانتظار", "تجاهلك", "الزحمة", "الملل"],
+    correct: "تجاهلك"
+  },
+
+  {
+    question: "إيه البلد اللي يورا نفسها تروحها؟ ✈️",
+    answers: ["إيطاليا", "فرنسا", "إسبانيا", "اليابان"],
+    correct: "إسبانيا"
+  }
+
+];
+
+let currentQuestion = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+
+  answered = false;
+
+  const q = questions[currentQuestion];
+
+  document.getElementById("progress").innerText =
+    `السؤال ${currentQuestion + 1} من ${questions.length}`;
+
+  document.getElementById("question").innerText = q.question;
+
+  const answersDiv = document.getElementById("answers");
+  answersDiv.innerHTML = "";
+
+  document.getElementById("next").style.display = "none";
+
+  // ترتيب الاختيارات بشكل عشوائي
+  const shuffled = [...q.answers].sort(() => Math.random() - 0.5);
+
+  shuffled.forEach(answer => {
+
+    const button = document.createElement("button");
+
+    button.innerText = answer;
+
+    button.onclick = () => checkAnswer(button, answer);
+
+    answersDiv.appendChild(button);
+
+  });
+}
+
+function checkAnswer(button, answer) {
+
+  if (answered) return;
+
+  answered = true;
+
+  const correct = questions[currentQuestion].correct;
+
+  if (answer === correct) {
+
+    score++;
+    button.classList.add("correct");
+
+  } else {
+
+    button.classList.add("wrong");
+
+    // إظهار الإجابة الصح
+    const buttons = document.querySelectorAll(".answers button");
+
+    buttons.forEach(btn => {
+
+      if (btn.innerText === correct) {
+        btn.classList.add("correct");
+      }
+
+    });
+
+  }
+
+  document.getElementById("next").style.display = "block";
+}
+
+function nextQuestion() {
+
+  currentQuestion++;
+
+  if (currentQuestion < questions.length) {
+
+    loadQuestion();
+
+  } else {
+
+    showResult();
+
+  }
+}
+
+function showResult() {
+
+  document.getElementById("quiz").style.display = "none";
+  document.getElementById("result").style.display = "block";
+
+  document.getElementById("score").innerText = score;
+
+  let message = "";
+
+  if (score === 10) {
+
+    message = "10/10 😭❤️ إنت حافظ يورا أكتر من نفسها! عاش يا يوسف 😂";
+
+  } else if (score >= 8) {
+
+    message = "جامد يا يوسف 😂❤️ واضح إنك مركز معاها جدًا، بس لسه في كام تفصيلة هربوا منك.";
+
+  } else if (score >= 5) {
+
+    message = "نص العلامة 😂 محتاج تركز مع يورا شوية أكتر يا عم.";
+
+  } else if (score >= 3) {
+
+    message = "إيه يا يوسف 😭😂 هو إنت تعرف يورا ولا أول مرة تقابلها؟";
+
+  } else {
+
+    message = "أنا لو مكانك مش هوريها النتيجة دي أصلًا 😂💀";
+
+  }
+
+  document.getElementById("message").innerText = message;
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
